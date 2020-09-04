@@ -61,13 +61,21 @@ class Mano {
 
         var tempIdTrezal = Utils.cambiarDeBaseString(idTrezalEnDecimal, 13)
 
-        if (idTrezalEnDecimal < LB) {
-            tempIdTrezal = Utils.cambiarDeBaseString(LB, 13)
+        if (idTrezalEnDecimal < LB || idTrezalEnDecimal > UB) {
+            this.cartas = mutableListOf()
+            this.aptitud = calcularAptitudV3()
+            this.idTrezal = tempIdTrezal
+            this.idTrezalEnDecimal = idTrezalEnDecimal
+            return
         }
 
+        /*if (idTrezalEnDecimal < LB){
+            tempIdTrezal = Utils.cambiarDeBaseString(LB, 13)
+        }
         if (idTrezalEnDecimal > UB) {
             tempIdTrezal = Utils.cambiarDeBaseString(UB, 13)
-        }
+        }*/
+
 
         // Comprobamos que todos los digitos del id sean validos en la base 13
         if (tempIdTrezal.filterNot { it in Constantes.DIGITOS_BASE_13 }.count() > 0){
@@ -92,20 +100,20 @@ class Mano {
 
         // Si hemos pasado una lista de cartas, calcularemos la aptitud de estas y guardaremos el id
         // tanto en trezal como en decimal
-        var tempIdCarta = ""
-        var tempIdCartaDecimal = -1L
+        this.idTrezal = ""
+        this.idTrezalEnDecimal = -1L
         if (cartas.isNotEmpty()){
+            var tempIdCarta = ""
             for (carta in cartas){
-                tempIdCarta += carta.idTrecEnDec
+                tempIdCarta += carta.idTrec
             }
-            tempIdCartaDecimal = Utils.cambiarDeBase(tempIdCarta, 13)
-            this.cartas = cartas.sorted()
+            val tempIdCartaDecimal = Utils.cambiarDeBase(tempIdCarta, 13)
+            this.idTrezal = tempIdCarta
+            this.idTrezalEnDecimal = tempIdCartaDecimal
             this.aptitud = calcularAptitudV3()
         }
 
 
-        this.idTrezal = tempIdCarta
-        this.idTrezalEnDecimal = tempIdCartaDecimal
     }
 
 
@@ -120,6 +128,10 @@ class Mano {
     private fun calcularAptitudV3(): Double {
 
         var fitness = 0
+
+        if(idTrezalEnDecimal < LB || idTrezalEnDecimal > UB){
+            return PEOR_APTITUD
+        }
 
         // Si hay varias cartas iguales se penalizara con la peor aptitud posible
         if (cartas.groupBy { it.idTrec }.entries.filter { it.value.size > 1 }.count() > 0){
@@ -161,6 +173,17 @@ class Mano {
         }
 
         return fitness.toDouble()
+    }
+
+    fun clip(min: Long = LB, max: Long = UB) {
+
+        if (idTrezalEnDecimal < min){
+            construirConId(LB)
+        }
+
+        if(idTrezalEnDecimal > max){
+            construirConId(UB)
+        }
     }
 
     override fun toString(): String {

@@ -10,7 +10,7 @@ import kotlin.math.sin
 
 fun main() {
 
-    HHO(300, 100000)
+    HHO(100, 100000)
 
 }
 
@@ -27,9 +27,9 @@ fun HHO(numeroAguilas: Int = 50, iteraciones: Int = 200){
 
     val curvaConvergencia = mutableListOf<Double>()
 
-    var mejor = aguilas.map { Pair(it.aptitud, it.cartas) }.minBy { it.first }!!
+    var mejor = aguilas.map { Pair(it.aptitud, it) }.minBy { it.first }!!
     println("Mejor aptitud inicial: " + mejor.first)
-    println("Mejores cartas iniciales: " + mejor.second)
+    println("Mejores cartas iniciales: " + mejor.second.cartas)
     println()
 
     for (i in 0 until iteraciones){
@@ -44,6 +44,9 @@ fun HHO(numeroAguilas: Int = 50, iteraciones: Int = 200){
 
         // Calculamos la aptitud de cada aguila
         for (posicionAguila in aguilas){
+
+            // Hacemos clip
+            posicionAguila.clip()
 
             val aptitud = posicionAguila.aptitud
 
@@ -146,7 +149,7 @@ fun HHO(numeroAguilas: Int = 50, iteraciones: Int = 200){
                     val fuerzaDelSalto = 2 * (1 - random()) // Fuerza de salto del conejo aleatorio
 
                     val X1 = localizacionConejo.idTrezalEnDecimal - energiaDeEscape * abs(fuerzaDelSalto * localizacionConejo.idTrezalEnDecimal - aguilas[j].idTrezalEnDecimal)
-                    val manoX1 = Mano(X1.toLong())
+                    val manoX1 = Mano(X1.toLong()).apply { clip() }
 
                     // Comprobamos si la aptitud de la nueva mano es mejor que la usada para crearle
                     if (manoX1.aptitud < aguilas[j].aptitud){
@@ -156,7 +159,7 @@ fun HHO(numeroAguilas: Int = 50, iteraciones: Int = 200){
                     // Realizan diveos rapidos y cortos alrededor del conejo
                     else {
                         val X2 = localizacionConejo.idTrezalEnDecimal - energiaDeEscape * abs(fuerzaDelSalto * localizacionConejo.idTrezalEnDecimal - aguilas[j].idTrezalEnDecimal) + random() * levy()
-                        val manoX2 = Mano(X2.toLong())
+                        val manoX2 = Mano(X2.toLong()).apply { clip() }
 
                         if (manoX2.aptitud < aguilas[j].aptitud){
                             aguilas[j] = manoX2
@@ -168,7 +171,7 @@ fun HHO(numeroAguilas: Int = 50, iteraciones: Int = 200){
                     val fuerzaDelSalto = 2 * (1 - random()) // Fuerza de salto del conejo aleatorio
 
                     val X1 = localizacionConejo.idTrezalEnDecimal - energiaDeEscape * abs(fuerzaDelSalto * localizacionConejo.idTrezalEnDecimal - aguilas.media())
-                    val manoX1 = Mano(X1.toLong())
+                    val manoX1 = Mano(X1.toLong()).apply { clip() }
 
                     // Comprobamos si la aptitud de la nueva mano es mejor que la usada para crearle
                     if (manoX1.aptitud < aguilas[j].aptitud){
@@ -179,7 +182,7 @@ fun HHO(numeroAguilas: Int = 50, iteraciones: Int = 200){
                     else {
 
                         val X2 = localizacionConejo.idTrezalEnDecimal - energiaDeEscape * abs(fuerzaDelSalto * localizacionConejo.idTrezalEnDecimal - aguilas.media()) + random() * levy()
-                        val manoX2 = Mano(X2.toLong())
+                        val manoX2 = Mano(X2.toLong()).apply { clip() }
 
                         if (manoX2.aptitud < aguilas[j].aptitud){
                             aguilas[j] = manoX2
