@@ -61,20 +61,18 @@ class Mano {
 
         var tempIdTrezal = Utils.cambiarDeBaseString(idTrezalEnDecimal, 13)
 
-        // Al ser el id menor a 0, crearemos una mano "invalida"
-        if (idTrezalEnDecimal < LB || idTrezalEnDecimal > UB){
-            this.cartas = mutableListOf()
-            this.aptitud = calcularAptitudV3()
-            this.idTrezalEnDecimal = idTrezalEnDecimal
-            this.idTrezal = tempIdTrezal
-            return
+        if (idTrezalEnDecimal < LB) {
+            tempIdTrezal = Utils.cambiarDeBaseString(LB, 13)
+        }
+
+        if (idTrezalEnDecimal > UB) {
+            tempIdTrezal = Utils.cambiarDeBaseString(UB, 13)
         }
 
         // Comprobamos que todos los digitos del id sean validos en la base 13
         if (tempIdTrezal.filterNot { it in Constantes.DIGITOS_BASE_13 }.count() > 0){
             throw InstantiationError("Hay digitos no permitidos en el id pasado por parametros")
         }
-
 
         // Añadimos los digitos que faltan hasta crear un id con 10 digitos
         if (tempIdTrezal.length < 10){
@@ -101,7 +99,7 @@ class Mano {
                 tempIdCarta += carta.idTrecEnDec
             }
             tempIdCartaDecimal = Utils.cambiarDeBase(tempIdCarta, 13)
-
+            this.cartas = cartas.sorted()
             this.aptitud = calcularAptitudV3()
         }
 
@@ -122,11 +120,6 @@ class Mano {
     private fun calcularAptitudV3(): Double {
 
         var fitness = 0
-
-        // Comprobamos que el idTrezal este dentro de los limites requeridos
-        if(idTrezalEnDecimal < LB || idTrezalEnDecimal > UB){
-            return PEOR_APTITUD
-        }
 
         // Si hay varias cartas iguales se penalizara con la peor aptitud posible
         if (cartas.groupBy { it.idTrec }.entries.filter { it.value.size > 1 }.count() > 0){
@@ -168,17 +161,6 @@ class Mano {
         }
 
         return fitness.toDouble()
-    }
-
-    fun clip(min: Long = LB, max: Long = UB) {
-
-        if (this.idTrezalEnDecimal < min){
-            construirConId(min)
-        }
-
-        else if (this.idTrezalEnDecimal > max){
-            construirConId(max)
-        }
     }
 
     override fun toString(): String {
